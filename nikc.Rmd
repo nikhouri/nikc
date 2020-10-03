@@ -1,0 +1,433 @@
+---
+title: "ggplot2 examples"
+author: "nik@nikhouri.com"
+output:
+  html_document:
+    fig_width: 10
+    fig_height: 6
+    toc: TRUE
+---
+
+# Formatting Guide
+
+## Discrete Colours
+
+Use colourblind-safe palettes. The default R ones are not.
+
+* [Paul Tol's palletes](https://personal.sron.nl/~pault/#sec:qualitative) - the _vibrant_ colour set are good for line charts, _bright_ are OK for bars. Lots of other colourblind-safe choices.
+* [Okabe & Ito](https://jfly.uni-koeln.de/color/) - looks good on bars, but a couple of colours are too light for line charts.
+* [ColorBrewer 2.0](https://colorbrewer2.org/) - is also good but doesn't have as many colours in the qualitative sets.
+
+```{r}
+tolvibrant <- c("#0077BB", "#33BBEE", "#009988", "#EE7733", "#CC3311", "#EE3377", "#BBBBBB")
+tolbright <- c("#4477AA", "#66CCEE", "#228833", "#CCBB44", "#EE6677", "#AA3377", "#BBBBBB")
+okabe <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+```
+
+```{r, echo=FALSE}
+library(ggplot2)
+
+# Function to display colour swatches
+showtheme <- function(colorset, setname) {
+    pcts=rep(1/length(colorset),length(colorset))
+    return (ggplot() +
+            geom_col(aes(x=1,y=pcts,fill=colorset),position=position_stack()) +
+            geom_text(aes(x=1,y=cumsum(pcts)-mean(pcts)/2,label=colorset),
+                      size=6, family="Fira Sans Extra Condensed") +
+            scale_fill_discrete(type=rev(colorset)) +
+            scale_x_continuous(label=NULL) +
+            scale_y_continuous(label=NULL) +
+            coord_flip() +
+            labs(x=NULL,y=NULL,title=paste("       ",setname)) +
+            theme_minimal() +
+            theme(legend.position="hidden",
+                  text=element_text(size=15, family="Fira Sans Extra Condensed"),
+                  axis.text.y=element_blank(),axis.ticks.y=element_blank(),
+                  panel.grid.major=element_blank(),
+                  panel.grid.minor = element_blank()))
+}
+```
+
+```{r, echo=FALSE, fig.height=1}
+showtheme(tolvibrant,"Tol Vibrant")
+```
+
+```{r, echo=FALSE, fig.height=1}
+showtheme(tolbright,"Tol Bright")
+```
+
+```{r, echo=FALSE, fig.height=1}
+showtheme(okabe,"Okabe-Ito")
+```
+
+Okabe & Ito also have good advice on figures:
+
+1. Make lines thicker, symbols larger
+2. Use various types of lines and symbols
+3. Avoid separate keys. Add labels within drawings.
+
+## Continuous Colours
+
+Use [viridis](https://cran.r-project.org/web/packages/viridis/vignettes/intro-to-viridis.html), it's colourblind-safe and built in to ggplot2 now anyway. Or one of the alternative viridis sets - but these need the library.
+
+```{r, eval=FALSE}
+# Builtin to ggplot
+ggplot() + scale_fill_continuous(type="viridis") 
+
+# Not builtin to ggplot - needs the viridis library
+library(viridis)
+ggplot() + scale_fill_viridis(option="plasma")
+```
+
+```{r, echo=FALSE, fig.height=1}
+ggplot() +
+    geom_col(aes(x=1,y=rep(1/1000,1000),fill=seq(1,1000)),position=position_stack()) +
+    scale_fill_continuous(type="viridis") +
+    scale_x_continuous(label=NULL) +
+    scale_y_continuous(label=NULL) +
+    coord_flip() +
+    labs(x=NULL,y=NULL,title=paste("        Viridis")) +
+    theme_minimal() +
+    theme(legend.position="hidden",
+          text=element_text(size=15, family="Fira Sans Extra Condensed"),
+          axis.text.y=element_blank(),axis.ticks.y=element_blank(),
+          panel.grid.major=element_blank(),
+          panel.grid.minor = element_blank())
+```
+
+```{r, echo=FALSE, fig.height=1}
+library(viridis)
+ggplot() +
+    geom_col(aes(x=1,y=rep(1/1000,1000),fill=seq(1,1000)),position=position_stack()) +
+    scale_fill_viridis(option="plasma") +
+    scale_x_continuous(label=NULL) +
+    scale_y_continuous(label=NULL) +
+    coord_flip() +
+    labs(x=NULL,y=NULL,title=paste("        Plasma")) +
+    theme_minimal() +
+    theme(legend.position="hidden",
+          text=element_text(size=15, family="Fira Sans Extra Condensed"),
+          axis.text.y=element_blank(),axis.ticks.y=element_blank(),
+          panel.grid.major=element_blank(),
+          panel.grid.minor = element_blank())
+```
+	
+## Fonts
+
+Use a condensed font. It allows you to squeeze in more text without having to abbreviate things in the title (and also looks good).
+
+* Fira Sans Extra Condensed - these examples use this font.
+* IBM Plex Sans Condensed - good alternative choice if using that family.
+
+...except for small numeric labels inline on the charts (ex. point-and-figure below). Just use the default.
+
+```{r}
+family="Fira Sans Extra Condensed" # General
+family="Fira Sans Extra Condensed Medium" # Titles
+```
+
+## Number Formatting
+
+Use a custom formatting function.
+
+```{r}
+# Add thousands separators (spaces)
+numfmt <- function(x) format(x, big.mark=" ", decimal.mark=".", scientific=FALSE)
+# Abbreviated numbers (thousands, millions, billions, trillions)
+bignumfmt <- function(x) {
+    if (x < 10**6) paste0(format(round(x/1000,0),big.mark=" ",decimal.mark="."),"K")
+    else if (x < 10**9) paste0(format(round(x/10**6,1),big.mark=" ", decimal.mark="."),"M")
+    else if (x < 10**12) paste0(format(round(x/10**9,1),big.mark=" ",decimal.mark=".",),"B")
+    else paste0(format(round(x/10**12,1),big.mark=" ",decimal.mark=".",),"T")
+}
+```
+
+# Basic Charts
+
+## Lines (time series): `geom_line()`
+
+Oil production data from BP (Quandl). Tweak label positions with `seed=n` in `geom_text_repel()` until you're happy with them.
+
+```{r}
+library(ggplot2)
+library(ggrepel)
+
+# Read in data file to data frame
+df <- read.csv('data/oildata.csv', sep=';',
+               colClasses=c("Date","numeric","factor"))
+
+# Label data
+labels <- merge(aggregate(Value ~ Country, data=df, FUN=max), df)
+
+# Tol Vibrant colour map
+tolvibrant <- c("#0077BB", "#33BBEE", "#009988", "#EE7733", "#CC3311", "#EE3377", "#BBBBBB")
+
+# Number format function
+numfmt <- function(x) format(x, big.mark=" ", decimal.mark=".", scientific=FALSE)
+
+# Plot data
+ggplot(df) +
+    # Data series
+    geom_line(aes(x=Date,y=Value,color=Country), size=1) +
+    # Data labels
+    geom_text_repel(data=labels, aes(x=Date,y=Value,label=Country),
+                    size=5, seed=21, family="Fira Sans Extra Condensed Medium") +
+    # Axis scales and colour scales
+    scale_y_continuous(label=numfmt) +
+    scale_color_discrete(type=tolvibrant) +
+    # Plot labels
+    labs(title="Daily Average Oil Production - Middle East (Gulf Countries)",
+         x="Year", y="Thousands of barrels/day",
+         subtitle = "Crude oil, shale oil, oil sands, and NGLs (Source: BP, accessed 2020-09-23)") +
+    # Themeing & fonts
+    theme_light() +
+    theme(legend.position="hidden",
+          text=element_text(size=15, family="Fira Sans Extra Condensed"),
+          plot.title=element_text(family="Fira Sans Extra Condensed Medium"))
+```
+
+## Stacked Bars: `geom_bar()`
+
+```{r}
+library(ggplot2)
+
+# Read in data file to data frame, get latest year
+df <- read.csv('data/oildata.csv', sep=';',
+               colClasses=c("Date","numeric","factor"))
+
+# Re-order so largest values sink to bottom
+df_ord <- df[df$Date == max(df$Date),]
+df$Country <- factor(df$Country,
+                     levels=df_ord$Country[order(df_ord$Value, decreasing=FALSE)])
+
+# Tol Vibrant colour map
+okabe <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+
+# Number format function
+numfmt <- function(x) format(x, big.mark=" ", decimal.mark=".", scientific=FALSE)
+
+# Plot data
+ggplot(df) +
+    # Data series
+    geom_bar(aes(fill=Country, x=Date, y=Value), position="stack", stat="identity") +
+    # Axis scales and colour scales
+    scale_y_continuous(label=numfmt) + 
+    scale_fill_discrete(type=okabe,
+                        guide=guide_legend(nrow=1)) +
+    # Plot labels
+    labs(title="Daily Average Oil Production - Middle East (Gulf Countries)",
+         x="Year", y="Thousands of barrels/day",
+         subtitle = "Crude oil, shale oil, oil sands, and NGLs (Source: BP)",
+         fill=NULL) +
+    # Themeing & fonts
+    theme_light() +
+    theme(legend.position="bottom",
+          text=element_text(size=15, family="Fira Sans Extra Condensed"),
+          plot.title=element_text(family="Fira Sans Extra Condensed Medium"))
+```
+
+## Column (horizontal bars): `geom_col() + coord_flip()`
+
+Better if doing categories that have longer names--they don't all get squished up. It's also a better way of showing percentage data instead of a pie chart.
+
+This example shows colouring based on category, sorting, and adding a line to annotate some kind of threshold.
+
+```{r}
+library(ggplot2)
+
+# Read in data file to data frame
+df <- read.csv('data/allergytest.csv', sep=';')
+
+# Create groups for colouring & re-order data frame by test values (ascending)
+df$over_range = df$test_values < 0.34
+df$foods <- factor(df$foods,
+                   levels=df$food[order(df$test_values, decreasing=TRUE)])
+
+# Okabe extract
+okabemini <- c("#F0E442","#009E73")
+
+# Plot data
+ggplot(df) +
+    # Data series
+    geom_col(aes(foods, test_values, fill=over_range)) +
+    # Data labels
+    geom_text(aes(x=foods, y=test_values, label=test_values),
+              nudge_y=0.15, color="black", size=2.75) +
+    # Threshold line
+    geom_hline(yintercept=0.34, linetype="dashed", color="black", alpha=0.5) +
+    geom_text(aes(nrow(df)-0.5,0.34,label="Allergy Threshold",hjust=-0.1),
+              family="Fira Sans Extra Condensed", size=5, color="grey40") + 
+    # Axis scales and colour scales
+    scale_fill_discrete(type=okabemini) +
+    coord_flip() +
+    # Plot labels
+    labs(x="Foods Tested",y="Test Values kUA/L (normal range 0.00-0.34)",
+         title="Allergy Test Results",
+         subtitle="(Source: NHS Testing, 2019-09-13)") +
+    # Themeing & fonts
+    theme_light() + 
+    theme(legend.position="hidden",
+          text=element_text(size=15, family="Fira Sans Extra Condensed"),
+          plot.title=element_text(family="Fira Sans Extra Condensed Medium"))
+```
+
+## Point and Range: `geom_pointrange()`
+
+Example using allergy test data.
+
+```{r}
+library(ggplot2)
+
+# Read in data file to data frame
+df <- read.csv('data/allergytest.csv', sep=';')
+
+# Create groups for colouring & re-order data frame by test values (ascending)
+df$over_range = df$test_values < 0.34
+df$foods <- factor(df$foods,
+                   levels=df$food[order(df$test_values, decreasing=TRUE)])
+
+# Tol Vibrant extract
+tolmini <- c("#EE3377","#009988")
+
+# Plot data
+ggplot(df) + 
+    # Data series
+    geom_pointrange(aes(x=foods, y=test_values, ymin=range_lo, ymax=range_hi,
+                        color=over_range)) +
+    # Data labels
+    geom_text(aes(x=foods, y=test_values, label=test_values), nudge_y=0.15,
+              nudge_x=0.4, color="black", size=2.75) +
+    # Axis scales and colour scales
+    scale_color_discrete(type=tolmini) +
+    coord_flip() +
+    # Plot labels
+    labs(x="Foods Tested",y="Test Values kUA/L (normal range 0.00-0.34)",
+         title="Allergy Test Results",
+         subtitle="(Source: NHS Testing, 2019-09-13)") +
+    # Themeing & fonts
+    theme_light() + 
+    theme(legend.position="hidden",
+          text=element_text(size=15, family="Fira Sans Extra Condensed"),
+          plot.title=element_text(family="Fira Sans Extra Condensed Medium"))
+```
+
+# Complex Charts
+
+## Facets: `facet_wrap()`
+
+```{r}
+library(ggplot2)
+library(ggrepel)
+
+# Read in data file to data frame
+df <- read.csv('data/oildata.csv', sep=';',
+               colClasses=c("Date","numeric","factor"))
+
+# Label data
+labels <- merge(aggregate(Value ~ Country, data=df, FUN=max), df)
+
+# Tol Vibrant colour map
+tolvibrant <- c("#0077BB", "#33BBEE", "#009988", "#EE7733", "#CC3311", "#EE3377", "#BBBBBB")
+
+# Number format function
+numfmt <- function(x) format(x, big.mark=" ", decimal.mark=".", scientific=FALSE)
+
+# Plot data
+ggplot(df) +
+    # Data series
+    geom_line(aes(x=Date,y=Value,color=Country), size=1) +
+    # Facet the series
+    facet_wrap(vars(Country),ncol=3) +
+    # Axis scales and colour scales
+    scale_y_continuous(label=numfmt) +
+    scale_color_discrete(type=tolvibrant) +
+    # Plot labels
+    labs(title="Daily Average Oil Production - Middle East (Gulf Countries)",
+         x="Year", y="Thousands of barrels/day",
+         subtitle = "Crude oil, shale oil, oil sands, and NGLs (Source: BP, accessed 2020-09-23)") +
+    # Themeing & fonts
+    theme_light() +
+    theme(legend.position="hidden", strip.background=element_blank(),
+          text=element_text(size=15, family="Fira Sans Extra Condensed"),
+          plot.title=element_text(family="Fira Sans Extra Condensed Medium"),
+          strip.text=element_text(size=15, color="black",
+                                  family="Fira Sans Extra Condensed Medium"))
+```
+
+## Map: `geom_map()`
+
+Note you'll probably need to do some remapping of country names to get them to work with (as in this case, using MaxMind Geolocation output from IP addresses)
+
+```{r}
+library(ggplot2)
+library(rworldmap)
+
+# Read in data file to data frame
+df <- read.csv('data/ufwdata.csv', sep=';',
+               colClasses=c("POSIXct","character","character"))
+
+# Turn it into a count of hits from each country
+dfc <- as.data.frame(table(df$country))
+colnames(dfc) <- c("Country","Count")
+
+# Plot map
+world <- map_data("world")
+ggplot() +
+    # Map outline
+    geom_map(dat=world, map=world, aes(map_id=region), fill="white",
+             color="black",size=0.15) +
+    # Country data
+    geom_map(data=dfc, map=world, aes(map_id=Country,fill=Count),
+             color="white",size=0.15) +
+    # Axis scales and colour scales
+    expand_limits(x=world$long,y=world$lat) +
+    scale_x_continuous(label=NULL) +
+    scale_y_continuous(label=NULL) +
+    scale_fill_continuous(type="viridis", trans='log2') +
+    # Plot Labels
+    labs(title="Firewall Blocks by Country for nikhouri.com, 2020-09-14 to 2020-09-20",
+         subtitle="Processed ufw log extacts (MaxMind IP geolocation, IANA service/port registry)", x=NULL ,y=NULL, fill=NULL) +
+    # Themeing & fonts
+    theme_light() +    
+    theme(legend.position="bottom",
+          text=element_text(size=15, family="Fira Sans Extra Condensed"),
+          plot.title=element_text(family="Fira Sans Extra Condensed Medium"))
+```
+
+## Heatmap `stat_bin2d()`
+
+The IANA service/ports registry isn't perfect, but the common ports are probably accurate.
+
+```{r}
+library(ggplot2)
+
+# Read in data file to data frame
+df <- read.csv('data/ufwdata.csv', sep=';',
+               colClasses=c("POSIXct","character","character"))
+
+# Filter for top 10 countries, and then top 10 services within them
+top <- df[df$country %in% names(tail(sort(table(df$country)),n=20)),]
+top <- top[top$service %in% names(tail(sort(table(top$service)),n=10)),]
+
+# Re-order factors based on overall counts
+top$country <- factor(top$country,
+                      levels=names(sort(table(top$country),decreasing=TRUE)))
+top$service <- factor(top$service,
+                      levels=names(sort(table(top$service),decreasing=TRUE)))
+
+# Plot heatmap
+ggplot(top) +
+    # Data set
+    stat_bin2d(aes(x=country, y=service, fill=after_stat(count))) +
+    # Axis scales and colour scales
+    scale_fill_continuous(type="viridis", trans="log2") +
+    # Plot Labels
+    labs(title="Firewall Blocks by Country and Service for nikhouri.com (2020-09-14 to 2020-09-20)",
+         subtitle="Processed ufw log extacts (MaxMind IP geolocation, IANA service/port registry)", x=NULL ,y=NULL, fill=NULL) +
+    # Themeing & Fonts
+    theme_light() +
+    theme(legend.position="bottom",
+          axis.text.x=element_text(angle=45, hjust=1),
+          text=element_text(size=15, family="Fira Sans Extra Condensed"),
+          plot.title=element_text(family="Fira Sans Extra Condensed Medium"))
+```

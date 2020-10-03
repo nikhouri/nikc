@@ -1,0 +1,78 @@
+---
+title: "data examples"
+author: "nik@nikhouri.com"
+output:
+  html_document:
+    fig_width: 10
+    fig_height: 6
+  toc: TRUE
+---
+
+# Reading Data
+
+## Import from CSV
+
+Specifying column types saves import time and additional steps later--especially when dates/times are involved.
+
+```{r}
+# Read in data file to data frame
+df <- read.csv('data/ufwdata.csv', sep=';',
+               colClasses=c("POSIXct","character","character"))
+
+str(df)
+```
+
+## Inline data
+
+Useful for keeping things to one file (for small data sets). Paste data into a string and read it as if it's a CSV.
+
+```{r}
+# Specify data in a string
+data <- '"time";"country";"service"
+2020-09-14 06:00:00;"Germany";"9545 (NA)"
+2020-09-14 06:00:00;"UK";"9703 (NA)"
+2020-09-14 06:00:00;"China";"13579 (NA)"
+2020-09-14 06:00:00;"Russia";"11684 (NA)"
+2020-09-14 06:00:00;"Germany";"11988 (NA)"
+2020-09-14 06:00:00;"China";"1433 (ms-sql-s)"
+2020-09-14 06:00:00;"Russia";"3694 (NA)"
+2020-09-14 06:00:00;"Germany";"17805 (NA)"
+2020-09-14 06:00:00;"Netherlands";"36350 (NA)"'
+
+# Read data from the string
+df <- read.csv(text=data, sep=';',
+               colClasses=c("POSIXct","character","character"))
+
+str(df)
+```
+
+# External Data Sources
+
+## Quandl
+
+Free data from Quandl doesn't need an account (for now)
+
+```{r}
+library(Quandl)
+
+# Initialize data series & data set identifiers
+oildata <- NULL
+oilsets <- list("Kuwait" = "BP/OIL_PROD_D_KWT",
+                "Oman" = "BP/OIL_PROD_D_OMN",
+                "UAE" = "BP/OIL_PROD_D_ARE",
+                "Saudi Arabia" = "BP/OIL_PROD_D_SAU",             
+                "Qatar" = "BP/OIL_PROD_D_QAT",
+                "Iran" = "BP/OIL_PROD_D_IRN")
+
+# Download time series for each country
+for (country in names(oilsets)) {
+    data <- Quandl(as.character(oilsets[country]))
+    data$Country <- country
+    oildata <- rbind(oildata,data)
+}
+
+head(oildata)
+summary(oildata)
+
+#write.table(oildata,file="data/oildata.csv", sep=";", row.names=FALSE)
+```

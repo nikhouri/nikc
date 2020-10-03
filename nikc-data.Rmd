@@ -5,7 +5,7 @@ output:
   html_document:
     fig_width: 10
     fig_height: 6
-  toc: TRUE
+    toc: TRUE
 ---
 
 # Reading Data

@@ -12,7 +12,7 @@ output:
 
 ## Discrete Colours
 
-Use colourblind-safe palettes. The default R ones are not.
+Here are some colourblind-safe palettes. The default R ones are not.
 
 * [Paul Tol's palletes](https://personal.sron.nl/~pault/#sec:qualitative) - the _vibrant_ colour set are good for line charts, _bright_ are OK for bars. Lots of other colourblind-safe choices.
 * [Okabe & Ito](https://jfly.uni-koeln.de/color/) - looks good on bars, but a couple of colours are too light for line charts.
@@ -67,8 +67,7 @@ Okabe & Ito also have good advice on figures:
 3. Avoid separate keys. Add labels within drawings.
 
 ## Continuous Colours
-
-Use [viridis](https://cran.r-project.org/web/packages/viridis/vignettes/intro-to-viridis.html), it's colourblind-safe and built in to ggplot2 now anyway. Or one of the alternative viridis sets - but these need the library.
+ [viridis](https://cran.r-project.org/web/packages/viridis/vignettes/intro-to-viridis.html), is colourblind-safe and built in to ggplot2 now anyway. There are alternative viridis sets - but these need the library.
 
 ```{r, eval=FALSE}
 # Builtin to ggplot
@@ -114,12 +113,12 @@ ggplot() +
 	
 ## Fonts
 
-Use a condensed font. It allows you to squeeze in more text without having to abbreviate things in the title (and also looks good).
+These are good condensed fonts. It allows you to squeeze in more text without having to abbreviate things in the title (and also looks good).
 
 * Fira Sans Extra Condensed - these examples use this font.
 * IBM Plex Sans Condensed - good alternative choice if using that family.
 
-...except for small numeric labels inline on the charts (ex. point-and-figure below). Just use the default.
+...except for small numeric labels inline on the charts (ex. point-and-figure below). Defaults are better there.
 
 ```{r}
 family="Fira Sans Extra Condensed" # General
@@ -128,7 +127,7 @@ family="Fira Sans Extra Condensed Medium" # Titles
 
 ## Number Formatting
 
-Use a custom formatting function.
+Common formatting changes for axes.
 
 ```{r}
 # Add thousands separators (spaces)
@@ -228,7 +227,7 @@ ggplot(df) +
 
 ## Column (horizontal bars): `geom_col() + coord_flip()`
 
-Better than vertical bars when the categories have longer names--they don't all get squished up. Also a better way of showing percentage data instead of a pie chart. This example shows colouring based on category, sorting, and adding a line to annotate some kind of threshold.
+Better than vertical bars when the categories have longer names--they don't all get squished up. Also a good way of showing percentage data instead of a pie chart.
 
 ```{r}
 library(ggplot2)
@@ -313,6 +312,8 @@ ggplot(df) +
 
 ## Facets: `facet_wrap()`
 
+Oil data above presented as individual line charts instead.
+
 ```{r}
 library(ggplot2)
 library(ggrepel)
@@ -395,7 +396,7 @@ ggplot() +
 
 ## Heatmap: `stat_bin2d()`
 
-The IANA service/ports registry isn't perfect, but the common ports are probably accurate.
+Not a proper analysis, but enough to get an example heatmap. Some programs of course don't respect the IANA service/ports registry mappings, but the common ports are probably accurate.
 
 ```{r}
 library(ggplot2)

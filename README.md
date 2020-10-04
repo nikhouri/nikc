@@ -44,6 +44,6 @@ Some reference examples for charting/data access & presentation.
 ### Data
 * [x] CSV imports (with dates/times)
 * [x] Inline data (CSV from string)
-* [ ] `topn` function
+* [x] `topn` function
 * [x] Quandl
 * [ ] UK, US, EU Government Data portals

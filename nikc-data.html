@@ -376,6 +376,9 @@ summary {
 <li><a href="#external-data-sources">External Data Sources</a><ul>
 <li><a href="#quandl">Quandl</a></li>
 </ul></li>
+<li><a href="#summaries">Summaries</a><ul>
+<li><a href="#topn"><code>topn()</code></a></li>
+</ul></li>
 </ul>
 </div>
 
@@ -425,15 +428,9 @@ str(df)</code></pre>
 <div id="quandl" class="section level2">
 <h2>Quandl</h2>
 <p>Free data from Quandl doesn’t need an account (for now)</p>
-<pre class="r"><code>library(Quandl)</code></pre>
-<pre><code>## Loading required package: xts</code></pre>
-<pre><code>## Loading required package: zoo</code></pre>
-<pre><code>## 
-## Attaching package: &#39;zoo&#39;</code></pre>
-<pre><code>## The following objects are masked from &#39;package:base&#39;:
-## 
-##     as.Date, as.Date.numeric</code></pre>
-<pre class="r"><code># Initialize data series &amp; data set identifiers
+<pre class="r"><code>library(Quandl)
+
+# Initialize data series &amp; data set identifiers
 oildata &lt;- NULL
 oilsets &lt;- list(&quot;Kuwait&quot; = &quot;BP/OIL_PROD_D_KWT&quot;,
                 &quot;Oman&quot; = &quot;BP/OIL_PROD_D_OMN&quot;,
@@ -466,6 +463,128 @@ head(oildata)</code></pre>
 ##  3rd Qu.:2005-12-31   3rd Qu.: 3733.5                     
 ##  Max.   :2018-12-31   Max.   :12406.0</code></pre>
 <pre class="r"><code>#write.table(oildata,file=&quot;data/oildata.csv&quot;, sep=&quot;;&quot;, row.names=FALSE)</code></pre>
+</div>
+</div>
+<div id="summaries" class="section level1">
+<h1>Summaries</h1>
+<div id="topn" class="section level2">
+<h2><code>topn()</code></h2>
+<p>Show a count, percent, and cumulative percent of items in a list</p>
+<pre class="r"><code># Read in data file to data frame
+df &lt;- read.csv(&#39;data/ufwdata.csv&#39;, sep=&#39;;&#39;,
+               colClasses=c(&quot;POSIXct&quot;,&quot;character&quot;,&quot;character&quot;))
+
+# Summarise count, pct, cmlpct for Top N items of list x. n=Inf shows everything
+topn &lt;- function(x, label=&quot;x&quot;, n=25) {
+    tab &lt;- table(x, dnn=label) # Count of each element
+    df &lt;- as.data.frame(tab, stringsAsFactors=FALSE) # Dataframe of list counts
+    df &lt;- df[order(df$Freq, decreasing=TRUE),] # Sort in decreasing order
+    rownames(df) &lt;- NULL # Reset row names after re-ordering table
+    if (nrow(df) &gt; n) { # If nrow &gt; n, summarize all values from n to nrows
+        oc &lt;- nrow(df) - n # Unique count of other elements
+        on &lt;- sum(df[-(1:n),]$Freq) # Total count of other elements
+        df[(n+1),] &lt;- list(paste0(&quot;Other (&quot;,oc,&quot;)&quot;), on)
+        df &lt;- df[1:(n+1),]
+        rownames(df)[n+1] &lt;- &quot;-&quot;
+    }
+    df$Pct &lt;- df$Freq/sum(df$Freq)*100 # Percentage
+    df$Cmlpct &lt;- round(cumsum(df$Pct),1) # Cumulative percentage
+    df$Pct &lt;- round(df$Pct,1) # Round to 1 d.p. for display
+    return(df)
+}
+
+top &lt;- topn(df$country,label=&quot;Country&quot;,n=10)
+knitr::kable(top,row.names=TRUE)</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left"></th>
+<th align="left">Country</th>
+<th align="right">Freq</th>
+<th align="right">Pct</th>
+<th align="right">Cmlpct</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">1</td>
+<td align="left">Netherlands</td>
+<td align="right">4914</td>
+<td align="right">20.0</td>
+<td align="right">20.0</td>
+</tr>
+<tr class="even">
+<td align="left">2</td>
+<td align="left">Russia</td>
+<td align="right">4696</td>
+<td align="right">19.1</td>
+<td align="right">39.1</td>
+</tr>
+<tr class="odd">
+<td align="left">3</td>
+<td align="left">Germany</td>
+<td align="right">3889</td>
+<td align="right">15.8</td>
+<td align="right">54.9</td>
+</tr>
+<tr class="even">
+<td align="left">4</td>
+<td align="left">USA</td>
+<td align="right">3400</td>
+<td align="right">13.8</td>
+<td align="right">68.7</td>
+</tr>
+<tr class="odd">
+<td align="left">5</td>
+<td align="left">China</td>
+<td align="right">2264</td>
+<td align="right">9.2</td>
+<td align="right">77.9</td>
+</tr>
+<tr class="even">
+<td align="left">6</td>
+<td align="left">UK</td>
+<td align="right">845</td>
+<td align="right">3.4</td>
+<td align="right">81.4</td>
+</tr>
+<tr class="odd">
+<td align="left">7</td>
+<td align="left">India</td>
+<td align="right">690</td>
+<td align="right">2.8</td>
+<td align="right">84.2</td>
+</tr>
+<tr class="even">
+<td align="left">8</td>
+<td align="left">Switzerland</td>
+<td align="right">590</td>
+<td align="right">2.4</td>
+<td align="right">86.6</td>
+</tr>
+<tr class="odd">
+<td align="left">9</td>
+<td align="left">Vietnam</td>
+<td align="right">299</td>
+<td align="right">1.2</td>
+<td align="right">87.8</td>
+</tr>
+<tr class="even">
+<td align="left">10</td>
+<td align="left">Singapore</td>
+<td align="right">232</td>
+<td align="right">0.9</td>
+<td align="right">88.7</td>
+</tr>
+<tr class="odd">
+<td align="left">-</td>
+<td align="left">Other (100)</td>
+<td align="right">2767</td>
+<td align="right">11.3</td>
+<td align="right">100.0</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 

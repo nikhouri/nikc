@@ -76,3 +76,37 @@ summary(oildata)
 
 #write.table(oildata,file="data/oildata.csv", sep=";", row.names=FALSE)
 ```
+
+# Summaries
+
+## `topn()`
+
+Show a count, percent, and cumulative percent of items in a list
+
+```{r}
+# Read in data file to data frame
+df <- read.csv('data/ufwdata.csv', sep=';',
+               colClasses=c("POSIXct","character","character"))
+
+# Summarise count, pct, cmlpct for Top N items of list x. n=Inf shows everything
+topn <- function(x, label="x", n=25) {
+    tab <- table(x, dnn=label) # Count of each element
+    df <- as.data.frame(tab, stringsAsFactors=FALSE) # Dataframe of list counts
+    df <- df[order(df$Freq, decreasing=TRUE),] # Sort in decreasing order
+    rownames(df) <- NULL # Reset row names after re-ordering table
+    if (nrow(df) > n) { # If nrow > n, summarize all values from n to nrows
+        oc <- nrow(df) - n # Unique count of other elements
+        on <- sum(df[-(1:n),]$Freq) # Total count of other elements
+        df[(n+1),] <- list(paste0("Other (",oc,")"), on)
+        df <- df[1:(n+1),]
+        rownames(df)[n+1] <- "-"
+    }
+    df$Pct <- df$Freq/sum(df$Freq)*100 # Percentage
+    df$Cmlpct <- round(cumsum(df$Pct),1) # Cumulative percentage
+    df$Pct <- round(df$Pct,1) # Round to 1 d.p. for display
+    return(df)
+}
+
+top <- topn(df$country,label="Country",n=10)
+knitr::kable(top,row.names=TRUE)
+```

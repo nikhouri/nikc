@@ -228,9 +228,7 @@ ggplot(df) +
 
 ## Column (horizontal bars): `geom_col() + coord_flip()`
 
-Better if doing categories that have longer names--they don't all get squished up. It's also a better way of showing percentage data instead of a pie chart.
-
-This example shows colouring based on category, sorting, and adding a line to annotate some kind of threshold.
+Better than vertical bars when the categories have longer names--they don't all get squished up. Also a better way of showing percentage data instead of a pie chart. This example shows colouring based on category, sorting, and adding a line to annotate some kind of threshold.
 
 ```{r}
 library(ggplot2)
@@ -386,7 +384,8 @@ ggplot() +
     scale_fill_continuous(type="viridis", trans='log2') +
     # Plot Labels
     labs(title="Firewall Blocks by Country for nikhouri.com, 2020-09-14 to 2020-09-20",
-         subtitle="Processed ufw log extacts (MaxMind IP geolocation, IANA service/port registry)", x=NULL ,y=NULL, fill=NULL) +
+         subtitle="Processed ufw log extacts (MaxMind IP geolocation, IANA service/port registry)",
+         x=NULL ,y=NULL, fill=NULL) +
     # Themeing & fonts
     theme_light() +    
     theme(legend.position="bottom",
@@ -394,7 +393,7 @@ ggplot() +
           plot.title=element_text(family="Fira Sans Extra Condensed Medium"))
 ```
 
-## Heatmap `stat_bin2d()`
+## Heatmap: `stat_bin2d()`
 
 The IANA service/ports registry isn't perfect, but the common ports are probably accurate.
 
@@ -423,7 +422,8 @@ ggplot(top) +
     scale_fill_continuous(type="viridis", trans="log2") +
     # Plot Labels
     labs(title="Firewall Blocks by Country and Service for nikhouri.com (2020-09-14 to 2020-09-20)",
-         subtitle="Processed ufw log extacts (MaxMind IP geolocation, IANA service/port registry)", x=NULL ,y=NULL, fill=NULL) +
+         subtitle="Processed ufw log extacts (MaxMind IP geolocation, IANA service/port registry)",
+         x=NULL ,y=NULL, fill=NULL) +
     # Themeing & Fonts
     theme_light() +
     theme(legend.position="bottom",

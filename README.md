@@ -4,7 +4,7 @@ nik@nikhouri.com
 Some reference examples for charting/data access & presentation.
 
 * Github: https://github.com/nikhouri/nikc
-* Rendered: https://nikhouri.com/nick/
+* Rendered: https://nikhouri.com/nikc
 
 ![](chart.png)
 
@@ -36,6 +36,7 @@ Some reference examples for charting/data access & presentation.
 ### Statistic
 * [ ] Scatter
 * [ ] Histogram
+* [ ] Boxplots
 * [ ] Boxplot alternatives
 * [ ] QQ
 * [ ] Volcano

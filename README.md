@@ -23,8 +23,8 @@ Some reference examples for charting/data access & presentation.
 ### Basic Charts
 * [x] Lines
 * [ ] Step (ex. tick px)
-* [x] Bar (categories)
 * [x] Stacked bars (time series)
+* [x] Column (categories)
 * [x] Range-and-point
 
 ### Complex
@@ -34,10 +34,9 @@ Some reference examples for charting/data access & presentation.
 * [ ] [Multi-panel w/ facets ](https://github.com/vcannataro/COVID19_data_explore/blob/master/output_data/figures/all_states_VS_each_state.png)
 
 ### Statistic
-* [ ] Scatter
-* [ ] Histogram
-* [ ] Boxplots
-* [ ] Boxplot alternatives
+* [x] Scatter
+* [x] Histogram 
+* [x] Boxplots
 * [ ] QQ
 * [ ] Volcano
 

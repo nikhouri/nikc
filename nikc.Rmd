@@ -181,7 +181,7 @@ ggplot(df) +
     # Plot labels
     labs(title="Daily Average Oil Production - Middle East (Gulf Countries)",
          x="Year", y="Thousands of barrels/day",
-         subtitle = "Crude oil, shale oil, oil sands, and NGLs (Source: bp Statistical Review of World Energy 2020)") +
+         subtitle = "Crude oil, shale oil, oil sands, and NGLs (Source: BP Statistical Review of World Energy 2020)") +
     # Themeing & fonts
     theme_light() +
     theme(legend.position="hidden",
@@ -224,7 +224,7 @@ ggplot(df) +
     # Plot labels
     labs(title="Daily Average Oil Production - Middle East (Gulf Countries)",
          x="Year", y="Thousands of barrels/day",
-         subtitle = "Crude oil, shale oil, oil sands, and NGLs (Source: bp Statistical Review of World Energy 2020)") +
+         subtitle = "Crude oil, shale oil, oil sands, and NGLs (Source: BP Statistical Review of World Energy 2020)") +
     # Themeing & fonts
     theme_light() +
     theme(legend.position="hidden", strip.background=element_blank(),
@@ -270,7 +270,7 @@ ggplot(df) +
     # Plot labels
     labs(title="Daily Average Oil Production - Middle East (Gulf Countries)",
          x="Year", y="Thousands of barrels/day",
-         subtitle = "Crude oil, shale oil, oil sands, and NGLs (Source: bp Statistical Review of World Energy 2020)",
+         subtitle = "Crude oil, shale oil, oil sands, and NGLs (Source: BP Statistical Review of World Energy 2020)",
          fill=NULL) +
     # Themeing & fonts
     theme_light() +

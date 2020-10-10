@@ -6,13 +6,14 @@ output:
     fig_width: 10
     fig_height: 6
     toc: TRUE
+    css: style.css
 ---
 
 # Formatting Guide
 
-## Discrete Colours
+## Categorical Data & Discrete Colours
 
-Here are some colourblind-safe palettes. The default R ones are not.
+Categorical legends are best put at the top of the plot. Readers first see what categories are displayed, _then_ how they relate to each other. Colour scales should be colourblind-safe. Here are some colourblind-safe palettes. The default R ones are not.
 
 * [Paul Tol's palletes](https://personal.sron.nl/~pault/#sec:qualitative) - the _vibrant_ colour set are good for line charts, _bright_ are OK for bars. Lots of other colourblind-safe choices.
 * [Okabe & Ito](https://jfly.uni-koeln.de/color/) - looks good on bars, but a couple of colours are too light for line charts.
@@ -66,8 +67,9 @@ Okabe & Ito also have good advice on figures:
 2. Use various types of lines and symbols
 3. Avoid separate keys. Add labels within drawings.
 
-## Continuous Colours
- [viridis](https://cran.r-project.org/web/packages/viridis/vignettes/intro-to-viridis.html), is colourblind-safe and built in to ggplot2 now anyway. There are alternative viridis sets - but these need the library.
+## Continuous Data & Colours
+
+Continuous data legends are best put at the bottom of the plot. Readers first see the shape of the data, _then_ can look up specific values via the legend. Colour scales should be colourblind-safe.  [viridis](https://cran.r-project.org/web/packages/viridis/vignettes/intro-to-viridis.html), is colourblind-safe and built in to ggplot2 now anyway. There are alternative viridis sets - but these need the library.
 
 ```{r, eval=FALSE}
 # Builtin to ggplot
@@ -145,7 +147,9 @@ bignumfmt <- function(x) {
 
 ## Lines (time series): `geom_line()`
 
-Oil production data from BP (Quandl). Tweak label positions with `seed=n` in `geom_text_repel()` until you're happy with them.
+Oil production data from BP (via Quandl). 
+
+* Inline labels at the max series values (try different positions using `seed=n` in `geom_text_repel()`)
 
 ```{r}
 library(ggplot2)
@@ -177,7 +181,7 @@ ggplot(df) +
     # Plot labels
     labs(title="Daily Average Oil Production - Middle East (Gulf Countries)",
          x="Year", y="Thousands of barrels/day",
-         subtitle = "Crude oil, shale oil, oil sands, and NGLs (Source: BP, accessed 2020-09-23)") +
+         subtitle = "Crude oil, shale oil, oil sands, and NGLs (Source: bp Statistical Review of World Energy 2020)") +
     # Themeing & fonts
     theme_light() +
     theme(legend.position="hidden",
@@ -188,6 +192,8 @@ ggplot(df) +
 ## Facets: `facet_wrap()`
 
 Oil data above presented as individual line charts instead.
+
+* Facets with custom themeing
 
 ```{r}
 library(ggplot2)
@@ -218,7 +224,7 @@ ggplot(df) +
     # Plot labels
     labs(title="Daily Average Oil Production - Middle East (Gulf Countries)",
          x="Year", y="Thousands of barrels/day",
-         subtitle = "Crude oil, shale oil, oil sands, and NGLs (Source: BP, accessed 2020-09-23)") +
+         subtitle = "Crude oil, shale oil, oil sands, and NGLs (Source: bp Statistical Review of World Energy 2020)") +
     # Themeing & fonts
     theme_light() +
     theme(legend.position="hidden", strip.background=element_blank(),
@@ -229,6 +235,11 @@ ggplot(df) +
 ```
 
 ## Stacked Bars: `geom_bar()`
+
+Oil data above presented as a stacked bar chart instead.
+
+* Data sorted largest at the bottom to smallest at the top
+* Legend moved to top (categories visible first, then data)
 
 ```{r}
 library(ggplot2)
@@ -259,7 +270,7 @@ ggplot(df) +
     # Plot labels
     labs(title="Daily Average Oil Production - Middle East (Gulf Countries)",
          x="Year", y="Thousands of barrels/day",
-         subtitle = "Crude oil, shale oil, oil sands, and NGLs (Source: BP)",
+         subtitle = "Crude oil, shale oil, oil sands, and NGLs (Source: bp Statistical Review of World Energy 2020)",
          fill=NULL) +
     # Themeing & fonts
     theme_light() +
@@ -271,6 +282,13 @@ ggplot(df) +
 ## Column (horizontal bars): `geom_col() + coord_flip()`
 
 Better than vertical bars when the categories have longer names--they don't all get squished up. Also a good way of showing percentage data instead of a pie chart.
+
+Allergy test results
+
+* Column (horizontal bar, using `coord_flip()`) plot, sorted by re-factoring
+* Categorised by adding a dummy variable & fill colour varies by group
+* In-chart annotation on threshold range - replaces legend
+* Data labels at the end of bars
 
 ```{r}
 library(ggplot2)
@@ -311,11 +329,14 @@ ggplot(df) +
           plot.title=element_text(family="Fira Sans Extra Condensed Medium"))
 ```
 
-
-
 ## Point and Range: `geom_pointrange()`
 
-Example using allergy test data.
+Allergy test results presented as point and range instead.
+
+* Data sorted
+* Categorised by adding dummy variable & colour varies by group
+* Range displays normal value range - replaces legend
+* Data labels on top of and slightly offset from points
 
 ```{r}
 library(ggplot2)
@@ -359,6 +380,11 @@ ggplot(df) +
 
 Note you'll probably need to do some remapping of country names to get them to work with (as in this case, using MaxMind Geolocation output from IP addresses)
 
+* Map plot with countries highlighted
+* Legend moved to bottom (data first, then legend)
+* Custom fonts
+* Continuous colour scale - using `log2`
+
 ```{r}
 library(ggplot2)
 library(rworldmap)
@@ -399,6 +425,12 @@ ggplot() +
 ## Heatmap: `stat_bin2d()`
 
 Not a proper analysis, but enough to get an example heatmap. Some programs of course don't respect the IANA service/ports registry mappings, but the common ports are probably accurate.
+
+* Heatmap using `stat_bin2d()`
+* Both factors re-sorted in decreasing order (roughly: bottom-left highest, top-right lowest)
+* Legend moved to bottom (data first, then legend)
+* Custom fonts
+* Continuous colour scale - using `log2`
 
 ```{r}
 library(ggplot2)
@@ -441,6 +473,10 @@ ggplot(top) +
 
 Example using CPU vs. CPU temperature, with a line overlay.
 
+* Categories shown using shape and colour (and larger size)
+* Legend moved to top (categories visible first, then data)
+* Fit line using a linear model (default is `loess`)
+
 ```{r}
 library(ggplot2)
 
@@ -472,9 +508,13 @@ ggplot(df) +
 
 ```
 
-## Histogram `geom_freq()`
+## Histogram `geom_histogram()` and `stat_ecdf()`
 
-Histogram with a cumulative curve on the second axis. Secondary axes are not easy to do in ggplot2, this example uses a manual factor to adjust the scaling.
+Histograms of the CPU data. Secondary axes are not easy to do in ggplot2, this example uses a manual factor to adjust the scaling.
+
+* Categorised & fill/line colour varies by group
+* Cumulative distribution shown for each category, on second axis (scaled by manually chosen factor)
+
 
 ```{r}
 library(ggplot2)
@@ -514,7 +554,10 @@ ggplot(df) +
 
 ## Boxplot `geom_boxplot()` and `geom_jitter()`
 
-Boxplots showing the underlying data (jittered).
+Boxplots of the CPU data.
+
+* One boxplot per category
+* Underlying data shown as jittered points (coloured by category)
 
 ```{r}
 library(ggplot2)

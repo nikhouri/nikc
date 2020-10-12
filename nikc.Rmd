@@ -401,8 +401,8 @@ colnames(dfc) <- c("Country","Count")
 world <- map_data("world")
 ggplot() +
     # Map outline
-    geom_map(dat=world, map=world, aes(map_id=region), fill="white",
-             color="black",size=0.15) +
+    geom_map(dat=world, map=world, aes(map_id=region), fill="#333333",
+             color="white",size=0.15) +
     # Country data
     geom_map(data=dfc, map=world, aes(map_id=Country,fill=Count),
              color="white",size=0.15) +
@@ -416,7 +416,7 @@ ggplot() +
          subtitle="Processed ufw log extacts (MaxMind IP geolocation, IANA service/port registry)",
          x=NULL ,y=NULL, fill=NULL) +
     # Themeing & fonts
-    theme_light() +    
+    theme_dark() +
     theme(legend.position="bottom",
           text=element_text(size=15, family="Fira Sans Extra Condensed"),
           plot.title=element_text(family="Fira Sans Extra Condensed Medium"))
@@ -485,7 +485,7 @@ df <- read.csv('data/rpicpu.csv', sep=';',
                colClasses=c('factor','POSIXct','numeric','numeric'))
 
 # Tol Bright extract
-tolmini <- c("#228833","#AA3377")
+tolmini <- c("#009988","#EE7733")
 
 # Plot data
 ggplot(df) +
@@ -524,7 +524,7 @@ df <- read.csv('data/rpicpu.csv', sep=';',
                colClasses=c('factor','POSIXct','numeric','numeric'))
 
 # Tol Bright extract
-tolmini <- c("#228833","#AA3377")
+tolmini <- c("#009988","#EE7733")
 
 # Scale factor for secondary axis. Plot the chart, look for the max bar
 # value on the histogram, try magics around that number until it looks good
@@ -567,7 +567,7 @@ df <- read.csv('data/rpicpu.csv', sep=';',
                colClasses=c('factor','POSIXct','numeric','numeric'))
 
 # Tol Bright extract
-tolmini <- c("#228833","#AA3377")
+tolmini <- c("#009988","#EE7733")
 
 # Plot data
 ggplot(df) +

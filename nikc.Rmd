@@ -557,7 +557,7 @@ ggplot(df) +
 Boxplots of the CPU data.
 
 * One boxplot per category
-* Underlying data shown as jittered points (coloured by category)
+* Underlying data shown as jittered points (coloured by category), see also https://simplystatistics.org/2019/02/21/dynamite-plots-must-die/
 
 ```{r}
 library(ggplot2)

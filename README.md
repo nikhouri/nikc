@@ -37,8 +37,6 @@ Some reference examples for charting/data access & presentation.
 * [x] Scatter
 * [x] Histogram 
 * [x] Boxplots
-* [ ] QQ
-* [ ] Volcano
 
 ### Data
 * [x] CSV imports (with dates/times)

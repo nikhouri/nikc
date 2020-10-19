@@ -160,7 +160,7 @@ df <- read.csv('data/oildata.csv', sep=';',
                colClasses=c("Date","numeric","factor"))
 
 # Label data
-labels <- merge(aggregate(Value ~ Country, data=df, FUN=max), df)
+labels <- merge(aggregate(Value ~ Country, data=df, FUN=first), df)
 
 # Tol Vibrant colour map
 tolvibrant <- c("#0077BB", "#33BBEE", "#009988", "#EE7733", "#CC3311", "#EE3377", "#BBBBBB")
@@ -174,7 +174,7 @@ ggplot(df) +
     geom_line(aes(x=Date,y=Value,color=Country), size=1) +
     # Data labels
     geom_text_repel(data=labels, aes(x=Date,y=Value,label=Country),
-                    size=5, seed=21, family="Fira Sans Extra Condensed Medium") +
+                    size=5, seed=9, family="Fira Sans Extra Condensed Medium") +
     # Axis scales and colour scales
     scale_y_continuous(label=numfmt) +
     scale_color_discrete(type=tolvibrant) +

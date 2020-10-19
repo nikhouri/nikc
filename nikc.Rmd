@@ -189,6 +189,66 @@ ggplot(df) +
           plot.title=element_text(family="Fira Sans Extra Condensed Medium"))
 ```
 
+## Stepped Line (time series): `geom_step()`
+
+Useful for granular price data (tick data), where you have all the exact values and interpolation isn't appropriate.
+
+Bank of England interest rate data https://www.bankofengland.co.uk/monetary-policy/the-interest-rate-bank-rate
+
+* Factors sorted to order they appear in the data
+* y-axis scale given explicit break widths
+* Steps with colours/factor changes need dummy rows added with duplicate data to keep the line continuous (if that's what you want)
+
+Actual data:
+
+```
+2005-08-04;4.5;Repo Rate 
+2006-08-03;4.75;Official Bank Rate
+```
+
+Data with dummy row:
+
+```
+2005-08-04;4.5;Repo Rate 
+2006-08-03;4.75;Repo Rate 
+2006-08-03;4.75;Official Bank Rate
+```
+
+
+```{r}
+library(ggplot2)
+
+# Read in the data file to data frame
+df <- read.csv('data/ukbankrate.csv', sep=';',
+               colClasses=c("Date","numeric","factor"))
+
+# Sort factor so it maintains order it appears in the data (for the legend)
+df$Type <- factor(df$Type, levels=unique(df$Type), ordered=TRUE)
+
+# Tol Vibrant colour map
+tolvibrant <- c("#0077BB", "#33BBEE", "#009988", "#EE7733", "#CC3311", "#EE3377", "#BBBBBB")
+
+# Plot data
+ggplot(df) +
+# Data series
+    geom_step(aes(x=Date,y=Rate,color=Type), size=1) +
+    # Axis scales and colour scales
+    scale_y_continuous(breaks=scales::breaks_width(1)) +
+    scale_color_discrete(type=tolvibrant) +
+    # Plot labels
+    labs(title="Bank of England Official Bank Rate 2000-2020",
+         x="Date", y="Bank Rate in %", color=NULL,
+         subtitle = 'Colour shows change in the rate\'s name: "Repo Rate" then "Official Bank Rate" (Source: Bank of England)') +
+    # Themeing & fonts
+    theme_light() +
+    theme(legend.position="hidden",strip.background=element_blank(),
+          text=element_text(size=15, family="Fira Sans Extra Condensed"),
+          plot.title=element_text(family="Fira Sans Extra Condensed Medium"),
+          strip.text=element_text(size=15, color="black",
+                                  family="Fira Sans Extra Condensed Medium"))
+```
+
+
 ## Facets: `facet_wrap()`
 
 Oil data above presented as individual line charts instead.

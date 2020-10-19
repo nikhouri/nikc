@@ -22,7 +22,7 @@ Some reference examples for charting/data access & presentation.
   
 ### Basic Charts
 * [x] Lines
-* [ ] Step (ex. tick px)
+* [x] Step (ex. tick px)
 * [x] Stacked bars (time series)
 * [x] Column (categories)
 * [x] Range-and-point

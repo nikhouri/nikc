@@ -67,6 +67,11 @@ Okabe & Ito also have good advice on figures:
 2. Use various types of lines and symbols
 3. Avoid separate keys. Add labels within drawings.
 
+Other formatting resources:
+
+* [The Economist's charts & maps style guides](https://design-system.economist.com/brand-and-marketing)
+* [The Financial Times' Chart Doctor series](https://www.ft.com/chart-doctor)
+
 ## Continuous Data & Colours
 
 Continuous data legends are best put at the bottom of the plot. Readers first see the shape of the data, _then_ can look up specific values via the legend. Colour scales should be colourblind-safe.  [viridis](https://cran.r-project.org/web/packages/viridis/vignettes/intro-to-viridis.html), is colourblind-safe and built in to ggplot2 now anyway. There are alternative viridis sets - but these need the library.

@@ -1,22 +1,20 @@
 # ggplot2 and data galleries
-nik@nikhouri.com
 
-Some reference examples for charting/data access & presentation.
+Personal reference examples for charting/data access & presentation.
 
 * Github: https://github.com/nikhouri/nikc
-* Rendered: https://nikhouri.com/nikc
 
 ![](chart.png)
 
 ## Charts
 
 * Rmarkdown [nikc.Rmd](nikc.Rmd)
-* Rendered [nikc.html](nikc.html)
+* Rendered [nikc.html](nikc.html) ([www](https://nikhouri.com/nikc/nikc.html))
 
 ## Data
 
 * Rmarkdown [nikc-data.Rmd](nikc-data.Rmd)
-* Rendered [nikc-data.html](nikc-data.html)
+* Rendered [nikc-data.html](nikc-data.html) ([www](https://nikhouri.com/nikc/nikc-data.html))
 
 ## Roadmap
   

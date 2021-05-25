@@ -322,7 +322,7 @@ df_ord <- df[df$Date == max(df$Date),]
 df$Country <- factor(df$Country,
                      levels=df_ord$Country[order(df_ord$Value, decreasing=FALSE)])
 
-# Tol Vibrant colour map
+# Okabe Ito colour map
 okabe <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 
 # Number format function

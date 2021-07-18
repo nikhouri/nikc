@@ -646,7 +646,7 @@ df_ord &lt;- df[df$Date == max(df$Date),]
 df$Country &lt;- factor(df$Country,
                      levels=df_ord$Country[order(df_ord$Value, decreasing=FALSE)])
 
-# Tol Vibrant colour map
+# Okabe Ito colour map
 okabe &lt;- c(&quot;#E69F00&quot;, &quot;#56B4E9&quot;, &quot;#009E73&quot;, &quot;#F0E442&quot;, &quot;#0072B2&quot;, &quot;#D55E00&quot;, &quot;#CC79A7&quot;)
 
 # Number format function

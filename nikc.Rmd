@@ -552,7 +552,7 @@ Example using CPU vs. CPU temperature, with a line overlay.
 
 * Categories shown using shape and colour (and larger size)
 * Legend moved to top (categories visible first, then data)
-* Fit line using a linear model (default is `loess`)
+* Fit lines using a linear model (default is `loess`)
 
 ```{r}
 library(ggplot2)
@@ -569,13 +569,15 @@ ggplot(df) +
     # Data series
     geom_point(aes(x=cpu, y=temp, color=label, shape=label),
                alpha=0.75, size=3) +
-    geom_smooth(aes(x=cpu, y=temp), method=lm, formula=y ~ x,
-                color="black", size=1.5) +
+    geom_smooth(data=df[df$label=="mail",], aes(x=cpu, y=temp), method=lm, 
+                formula=y ~ x, color="#009988", size=1.5) +
+    geom_smooth(data=df[df$label=="web",], aes(x=cpu, y=temp), method=lm, 
+                formula=y ~ x, color="#EE7733", size=1.5) +
     # Axis scales and colour scales
     scale_color_discrete(type=tolmini) +
     # Plot labels
     labs(x="CPU Utilization in %",y="CPU Temperature in °C", color=NULL, shape=NULL,
-         title="CPU Utilization vs. CPU Tempurature",
+         title="CPU Utilization vs. CPU Temperature",
          subtitle="1-second samples of 5-minute runs of 2 activities, reading mail and web browsing",
          caption="Source: logged session on 2020-10-08") +
     # Themeing & fonts
@@ -584,7 +586,6 @@ ggplot(df) +
           text=element_text(size=15, family="Fira Sans Extra Condensed"),
           plot.title=element_text(family="Fira Sans Extra Condensed Medium"),
           plot.caption=element_text(color="#666666"))
-
 ```
 
 ## Histogram `geom_histogram()` and `stat_ecdf()`

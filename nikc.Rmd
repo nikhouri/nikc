@@ -552,7 +552,7 @@ Example using CPU vs. CPU temperature, with a line overlay.
 
 * Categories shown using shape and colour (and larger size)
 * Legend moved to top (categories visible first, then data)
-* Fit lines using a linear model (default is `loess`)
+* Fit lines using a linear model (default is `loess`) (example, not a real analysis!)
 
 ```{r}
 library(ggplot2)
@@ -560,6 +560,9 @@ library(ggplot2)
 # Read in data file to data frame
 df <- read.csv('data/rpicpu.csv', sep=';',
                colClasses=c('factor','POSIXct','numeric','numeric'))
+
+# Add counts to legend labels
+df$label <- paste0(df$label," (n=",table(df$label)[df$label],")")
 
 # Tol Bright extract
 tolmini <- c("#009988","#EE7733")
@@ -602,6 +605,9 @@ library(ggplot2)
 # Read in data file to data frame
 df <- read.csv('data/rpicpu.csv', sep=';',
                colClasses=c('factor','POSIXct','numeric','numeric'))
+
+# Add counts to legend labels
+df$label <- paste0(df$label," (n=",table(df$label)[df$label],")")
 
 # Tol Bright extract
 tolmini <- c("#009988","#EE7733")
@@ -647,6 +653,9 @@ library(ggplot2)
 # Read in data file to data frame
 df <- read.csv('data/rpicpu.csv', sep=';',
                colClasses=c('factor','POSIXct','numeric','numeric'))
+
+# Add counts to legend labels
+df$label <- paste0(df$label," (n=",table(df$label)[df$label],")")
 
 # Tol Bright extract
 tolmini <- c("#009988","#EE7733")

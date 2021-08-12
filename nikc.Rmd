@@ -570,12 +570,9 @@ tolmini <- c("#009988","#EE7733")
 # Plot data
 ggplot(df) +
     # Data series
-    geom_point(aes(x=cpu, y=temp, color=label, shape=label),
-               alpha=0.75, size=3) +
-    geom_smooth(data=df[df$label=="mail",], aes(x=cpu, y=temp), method=lm, 
-                formula=y ~ x, color="#009988", size=1.5) +
-    geom_smooth(data=df[df$label=="web",], aes(x=cpu, y=temp), method=lm, 
-                formula=y ~ x, color="#EE7733", size=1.5) +
+    geom_point(aes(x=cpu, y=temp, color=label, shape=label), alpha=0.75, size=3) +
+    geom_smooth(aes(x=cpu, y=temp, color=label), method=lm, formula=y ~ x, 
+                size=1.5, show.legend=FALSE) +
     # Axis scales and colour scales
     scale_color_discrete(type=tolmini) +
     # Plot labels

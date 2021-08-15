@@ -148,6 +148,140 @@ bignumfmt <- function(x) {
 }
 ```
 
+# Statistic Charts
+
+## Scatter: `geom_point()`
+
+Example using CPU vs. CPU temperature, with a line overlay.
+
+* Categories shown using shape and colour (and larger size)
+* Legend moved to top (categories visible first, then data)
+* Fit lines using a linear model (default is `loess` --- example, not a real analysis!)
+
+```{r}
+library(ggplot2)
+
+# Read in data file to data frame
+df <- read.csv('data/rpicpu.csv', sep=';',
+               colClasses=c('factor','POSIXct','numeric','numeric'))
+
+# Add counts to legend labels
+df$label <- paste0(df$label," (n=",table(df$label)[df$label],")")
+
+# Tol Bright extract
+tolmini <- c("#009988","#EE7733")
+
+# Plot data
+ggplot(df) +
+    # Data series
+    geom_point(aes(x=cpu, y=temp, color=label, shape=label), alpha=0.75, size=3) +
+    geom_smooth(aes(x=cpu, y=temp, color=label), method=lm, formula=y ~ x, 
+                size=1.5, show.legend=FALSE) +
+    # Axis scales and colour scales
+    scale_color_discrete(type=tolmini) +
+    # Plot labels
+    labs(x="CPU Utilization in %",y="CPU Temperature in °C", color=NULL, shape=NULL,
+         title="CPU Utilization vs. CPU Temperature",
+         subtitle="1-second samples of 5-minute runs of 2 activities, reading mail and web browsing",
+         caption="Source: logged session on 2020-10-08") +
+    # Themeing & fonts
+    theme_light() + 
+    theme(legend.position="top",
+          text=element_text(size=15, family="Fira Sans Extra Condensed"),
+          plot.title=element_text(family="Fira Sans Extra Condensed Medium"),
+          plot.caption=element_text(color="#666666"))
+```
+
+## Histogram `geom_histogram()` and `stat_ecdf()`
+
+Histograms of the CPU data. Secondary axes are not easy to do in ggplot2, this example uses a manual factor to adjust the scaling.
+
+* Categorised & fill/line colour varies by group
+* Cumulative distribution shown for each category, on second axis (scaled by manually chosen factor)
+
+
+```{r}
+library(ggplot2)
+
+# Read in data file to data frame
+df <- read.csv('data/rpicpu.csv', sep=';',
+               colClasses=c('factor','POSIXct','numeric','numeric'))
+
+# Add counts to legend labels
+df$label <- paste0(df$label," (n=",table(df$label)[df$label],")")
+
+# Tol Bright extract
+tolmini <- c("#009988","#EE7733")
+
+# Scale factor for secondary axis. Plot the chart, look for the max bar
+# value on the histogram, try magics around that number until it looks good
+magic <- 36
+
+# Plot data
+ggplot(df) +
+    # Data series
+    geom_histogram(aes(x=cpu, fill=label, color=label), bins=30,
+                   position="identity", alpha=0.7) +
+    stat_ecdf(aes(x=cpu, y=..y.. * magic, color=label), geom="step", size=1) +
+    # Axis scales and colour scales
+    scale_y_continuous(sec.axis=sec_axis(~ . / magic, name="Cumulative Distribution (lines)")) +
+    scale_fill_discrete(type=tolmini) +
+    scale_color_discrete(type=tolmini) +
+    # Plot labels
+    labs(x="CPU Utilization in %",y="Count (bars)", fill=NULL, color=NULL,
+         title="CPU Utilization, Reading Mail vs. Web Browsing",
+         subtitle="1-second samples of 5-minute runs of 2 activities, reading mail and web browsing",
+         caption="Source: logged session on 2020-10-08") +
+    guides(color="none",fill="legend") +
+    # Themeing & fonts
+    theme_light() + 
+    theme(legend.position="top",
+          text=element_text(size=15, family="Fira Sans Extra Condensed"),
+          plot.title=element_text(family="Fira Sans Extra Condensed Medium"),
+          plot.caption=element_text(color="#666666"))
+```
+
+## Boxplot `geom_boxplot()` and `geom_jitter()`
+
+Boxplots of the CPU data.
+
+* One boxplot per category
+* Underlying data shown as jittered points (coloured by category), see also https://simplystatistics.org/2019/02/21/dynamite-plots-must-die/
+
+```{r}
+library(ggplot2)
+
+# Read in data file to data frame
+df <- read.csv('data/rpicpu.csv', sep=';',
+               colClasses=c('factor','POSIXct','numeric','numeric'))
+
+# Add counts to legend labels
+df$label <- paste0(df$label," (n=",table(df$label)[df$label],")")
+
+# Tol Bright extract
+tolmini <- c("#009988","#EE7733")
+
+# Plot data
+ggplot(df) +
+    # Data series
+    geom_boxplot(aes(x=label, y=cpu), outlier.shape=NA) +
+    geom_jitter(aes(x=label, y=cpu, color=label), width=0.1, alpha=0.5) +
+    # Axis scales and colour scales
+    scale_fill_discrete(type=tolmini) +
+    scale_color_discrete(type=tolmini) +
+    # Plot labels
+    labs(x="Activity",y="CPU Utilization in %", fill=NULL, color=NULL,
+         title="CPU Utilization, Reading Mail vs. Web Browsing",
+         subtitle="1-second samples of 5-minute runs of 2 activities, reading mail and web browsing",
+         caption="Source: logged session on 2020-10-08") +
+    # Themeing & fonts
+    theme_light() + 
+    theme(legend.position="hidden",
+          text=element_text(size=15, family="Fira Sans Extra Condensed"),
+          plot.title=element_text(family="Fira Sans Extra Condensed Medium"),
+          plot.caption=element_text(color="#666666"))
+```
+
 # Basic Charts
 
 ## Lines (time series): `geom_line()`
@@ -539,140 +673,6 @@ ggplot(top) +
     theme_light() +
     theme(legend.position="bottom",
           axis.text.x=element_text(angle=45, hjust=1),
-          text=element_text(size=15, family="Fira Sans Extra Condensed"),
-          plot.title=element_text(family="Fira Sans Extra Condensed Medium"),
-          plot.caption=element_text(color="#666666"))
-```
-
-# Statistic Charts
-
-## Scatter: `geom_point()`
-
-Example using CPU vs. CPU temperature, with a line overlay.
-
-* Categories shown using shape and colour (and larger size)
-* Legend moved to top (categories visible first, then data)
-* Fit lines using a linear model (default is `loess` --- example, not a real analysis!)
-
-```{r}
-library(ggplot2)
-
-# Read in data file to data frame
-df <- read.csv('data/rpicpu.csv', sep=';',
-               colClasses=c('factor','POSIXct','numeric','numeric'))
-
-# Add counts to legend labels
-df$label <- paste0(df$label," (n=",table(df$label)[df$label],")")
-
-# Tol Bright extract
-tolmini <- c("#009988","#EE7733")
-
-# Plot data
-ggplot(df) +
-    # Data series
-    geom_point(aes(x=cpu, y=temp, color=label, shape=label), alpha=0.75, size=3) +
-    geom_smooth(aes(x=cpu, y=temp, color=label), method=lm, formula=y ~ x, 
-                size=1.5, show.legend=FALSE) +
-    # Axis scales and colour scales
-    scale_color_discrete(type=tolmini) +
-    # Plot labels
-    labs(x="CPU Utilization in %",y="CPU Temperature in °C", color=NULL, shape=NULL,
-         title="CPU Utilization vs. CPU Temperature",
-         subtitle="1-second samples of 5-minute runs of 2 activities, reading mail and web browsing",
-         caption="Source: logged session on 2020-10-08") +
-    # Themeing & fonts
-    theme_light() + 
-    theme(legend.position="top",
-          text=element_text(size=15, family="Fira Sans Extra Condensed"),
-          plot.title=element_text(family="Fira Sans Extra Condensed Medium"),
-          plot.caption=element_text(color="#666666"))
-```
-
-## Histogram `geom_histogram()` and `stat_ecdf()`
-
-Histograms of the CPU data. Secondary axes are not easy to do in ggplot2, this example uses a manual factor to adjust the scaling.
-
-* Categorised & fill/line colour varies by group
-* Cumulative distribution shown for each category, on second axis (scaled by manually chosen factor)
-
-
-```{r}
-library(ggplot2)
-
-# Read in data file to data frame
-df <- read.csv('data/rpicpu.csv', sep=';',
-               colClasses=c('factor','POSIXct','numeric','numeric'))
-
-# Add counts to legend labels
-df$label <- paste0(df$label," (n=",table(df$label)[df$label],")")
-
-# Tol Bright extract
-tolmini <- c("#009988","#EE7733")
-
-# Scale factor for secondary axis. Plot the chart, look for the max bar
-# value on the histogram, try magics around that number until it looks good
-magic <- 36
-
-# Plot data
-ggplot(df) +
-    # Data series
-    geom_histogram(aes(x=cpu, fill=label, color=label), bins=30,
-                   position="identity", alpha=0.7) +
-    stat_ecdf(aes(x=cpu, y=..y.. * magic, color=label), geom="step", size=1) +
-    # Axis scales and colour scales
-    scale_y_continuous(sec.axis=sec_axis(~ . / magic, name="Cumulative Distribution (lines)")) +
-    scale_fill_discrete(type=tolmini) +
-    scale_color_discrete(type=tolmini) +
-    # Plot labels
-    labs(x="CPU Utilization in %",y="Count (bars)", fill=NULL, color=NULL,
-         title="CPU Utilization, Reading Mail vs. Web Browsing",
-         subtitle="1-second samples of 5-minute runs of 2 activities, reading mail and web browsing",
-         caption="Source: logged session on 2020-10-08") +
-    guides(color="none",fill="legend") +
-    # Themeing & fonts
-    theme_light() + 
-    theme(legend.position="top",
-          text=element_text(size=15, family="Fira Sans Extra Condensed"),
-          plot.title=element_text(family="Fira Sans Extra Condensed Medium"),
-          plot.caption=element_text(color="#666666"))
-```
-
-## Boxplot `geom_boxplot()` and `geom_jitter()`
-
-Boxplots of the CPU data.
-
-* One boxplot per category
-* Underlying data shown as jittered points (coloured by category), see also https://simplystatistics.org/2019/02/21/dynamite-plots-must-die/
-
-```{r}
-library(ggplot2)
-
-# Read in data file to data frame
-df <- read.csv('data/rpicpu.csv', sep=';',
-               colClasses=c('factor','POSIXct','numeric','numeric'))
-
-# Add counts to legend labels
-df$label <- paste0(df$label," (n=",table(df$label)[df$label],")")
-
-# Tol Bright extract
-tolmini <- c("#009988","#EE7733")
-
-# Plot data
-ggplot(df) +
-    # Data series
-    geom_boxplot(aes(x=label, y=cpu), outlier.shape=NA) +
-    geom_jitter(aes(x=label, y=cpu, color=label), width=0.1, alpha=0.5) +
-    # Axis scales and colour scales
-    scale_fill_discrete(type=tolmini) +
-    scale_color_discrete(type=tolmini) +
-    # Plot labels
-    labs(x="Activity",y="CPU Utilization in %", fill=NULL, color=NULL,
-         title="CPU Utilization, Reading Mail vs. Web Browsing",
-         subtitle="1-second samples of 5-minute runs of 2 activities, reading mail and web browsing",
-         caption="Source: logged session on 2020-10-08") +
-    # Themeing & fonts
-    theme_light() + 
-    theme(legend.position="hidden",
           text=element_text(size=15, family="Fira Sans Extra Condensed"),
           plot.title=element_text(family="Fira Sans Extra Condensed Medium"),
           plot.caption=element_text(color="#666666"))

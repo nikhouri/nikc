@@ -18,9 +18,22 @@ Specifying column types saves import time and additional steps later--especially
 ```{r}
 # Read in data file to data frame
 df <- read.csv('data/ufwdata.csv', sep=';',
-               colClasses=c("POSIXct","character","character"))
+               colClasses=c("POSIXct","factor","factor"))
 
 str(df)
+```
+
+## Import all CSVs in a directory
+
+All CSVs must have the same format & column types (enforcing with `colClasses` will help, along with speeding things up). Normally would use the pattern `"\\.csv$"`, which is equivalent to `*.csv` in a shell.
+
+```{r}
+# Join all CSVs in a directory into a data frame & summarize by some factor
+csvfiles <- list.files("data/", "oil.*\\.csv$", full.names=TRUE)
+df <- do.call(rbind, lapply(csvfiles, read.csv, sep=";",
+                            colClasses=c("POSIXct","numeric","factor")))
+aggregate(Value~Country,data=df,FUN=summary)
+
 ```
 
 ## Inline data
@@ -42,7 +55,7 @@ data <- '"time";"country";"service"
 
 # Read data from the string
 df <- read.csv(text=data, sep=';',
-               colClasses=c("POSIXct","character","character"))
+               colClasses=c("POSIXct","factor","factor"))
 
 str(df)
 ```
@@ -53,7 +66,7 @@ str(df)
 
 Free data from Quandl doesn't need an account (for now). Working out underlying licensing & citing it properly takes a little work--Quandl just has the data. (below is from the [BP Statistical Review of World Energy 2020](https://www.bp.com/en/global/corporate/energy-economics/statistical-review-of-world-energy/downloads.html)).
 
-```{r}
+```{r, message=FALSE, warning=FALSE, error=FALSE}
 library(Quandl)
 
 # Initialize data series & data set identifiers
@@ -75,7 +88,8 @@ for (country in names(oilsets)) {
 head(oildata)
 summary(oildata)
 
-#write.table(oildata,file="data/oildata.csv", sep=";", row.names=FALSE)
+# Write data to disk - commented out as we have already & don't want a refresh
+# write.table(oildata,file="data/oildata.csv", sep=";", row.names=FALSE)
 ```
 
 # Summaries
@@ -87,7 +101,7 @@ Show a count, percent, and cumulative percent of items in a list
 ```{r}
 # Read in data file to data frame
 df <- read.csv('data/ufwdata.csv', sep=';',
-               colClasses=c("POSIXct","character","character"))
+               colClasses=c("POSIXct","factor","factor"))
 
 # Summarise count, pct, cmlpct for Top N items of list x. n=Inf shows everything
 topn <- function(x, label="x", n=25) {

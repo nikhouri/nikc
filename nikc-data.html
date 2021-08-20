@@ -397,6 +397,7 @@ summary {
 <ul>
 <li><a href="#reading-data">Reading Data</a><ul>
 <li><a href="#import-from-csv">Import from CSV</a></li>
+<li><a href="#import-all-csvs-in-a-directory">Import all CSVs in a directory</a></li>
 <li><a href="#inline-data">Inline data</a></li>
 </ul></li>
 <li><a href="#external-data-sources">External Data Sources</a><ul>
@@ -415,13 +416,36 @@ summary {
 <p>Specifying column types saves import time and additional steps later–especially when dates/times are involved.</p>
 <pre class="r"><code># Read in data file to data frame
 df &lt;- read.csv(&#39;data/ufwdata.csv&#39;, sep=&#39;;&#39;,
-               colClasses=c(&quot;POSIXct&quot;,&quot;character&quot;,&quot;character&quot;))
+               colClasses=c(&quot;POSIXct&quot;,&quot;factor&quot;,&quot;factor&quot;))
 
 str(df)</code></pre>
 <pre><code>## &#39;data.frame&#39;:    24586 obs. of  3 variables:
 ##  $ time   : POSIXct, format: &quot;2020-09-14 06:00:00&quot; &quot;2020-09-14 06:00:00&quot; ...
-##  $ country: chr  &quot;Germany&quot; &quot;UK&quot; &quot;China&quot; &quot;Russia&quot; ...
-##  $ service: chr  &quot;9545 (NA)&quot; &quot;9703 (NA)&quot; &quot;13579 (NA)&quot; &quot;11684 (NA)&quot; ...</code></pre>
+##  $ country: Factor w/ 110 levels &quot;Albania&quot;,&quot;Algeria&quot;,..: 35 101 20 82 35 20 82 35 66 44 ...
+##  $ service: Factor w/ 13135 levels &quot;0 ()&quot;,&quot;1 (tcpmux)&quot;,..: 12941 13002 1245 501 595 1507 7432 2955 7369 2879 ...</code></pre>
+</div>
+<div id="import-all-csvs-in-a-directory" class="section level2">
+<h2>Import all CSVs in a directory</h2>
+<p>All CSVs must have the same format &amp; column types (enforcing with <code>colClasses</code> will help, along with speeding things up). Normally would use the pattern <code>&quot;\\.csv$&quot;</code>, which is equivalent to <code>*.csv</code> in a shell.</p>
+<pre class="r"><code># Join all CSVs in a directory into a data frame &amp; summarize by some factor
+csvfiles &lt;- list.files(&quot;data/&quot;, &quot;oil.*\\.csv$&quot;, full.names=TRUE)
+df &lt;- do.call(rbind, lapply(csvfiles, read.csv, sep=&quot;;&quot;,
+                            colClasses=c(&quot;POSIXct&quot;,&quot;numeric&quot;,&quot;factor&quot;)))
+aggregate(Value~Country,data=df,FUN=summary)</code></pre>
+<pre><code>##        Country Value.Min. Value.1st Qu. Value.Median Value.Mean Value.3rd Qu.
+## 1         Iran  1321.0312     2975.1537    3767.5211  3725.8222     4400.2243
+## 2       Kuwait   185.0000     1964.7500    2306.3890  2228.6039     2769.2243
+## 3         Oman     0.0000      333.5000     713.1966   618.5039      893.9801
+## 4        Qatar   233.0000      407.4823     491.1585   802.2663     1130.6003
+## 5 Saudi Arabia  2219.3000     5759.6852    8954.2839  8158.0072    10265.5648
+## 6          UAE   282.2000     1486.6152    2320.3340  2170.7550     2814.8881
+##   Value.Max.
+## 1  6060.3014
+## 2  3339.0000
+## 3  1004.2626
+## 4  1990.7129
+## 5 12406.0476
+## 6  4037.5411</code></pre>
 </div>
 <div id="inline-data" class="section level2">
 <h2>Inline data</h2>
@@ -440,13 +464,13 @@ data &lt;- &#39;&quot;time&quot;;&quot;country&quot;;&quot;service&quot;
 
 # Read data from the string
 df &lt;- read.csv(text=data, sep=&#39;;&#39;,
-               colClasses=c(&quot;POSIXct&quot;,&quot;character&quot;,&quot;character&quot;))
+               colClasses=c(&quot;POSIXct&quot;,&quot;factor&quot;,&quot;factor&quot;))
 
 str(df)</code></pre>
 <pre><code>## &#39;data.frame&#39;:    9 obs. of  3 variables:
 ##  $ time   : POSIXct, format: &quot;2020-09-14 06:00:00&quot; &quot;2020-09-14 06:00:00&quot; ...
-##  $ country: chr  &quot;Germany&quot; &quot;UK&quot; &quot;China&quot; &quot;Russia&quot; ...
-##  $ service: chr  &quot;9545 (NA)&quot; &quot;9703 (NA)&quot; &quot;13579 (NA)&quot; &quot;11684 (NA)&quot; ...</code></pre>
+##  $ country: Factor w/ 5 levels &quot;China&quot;,&quot;Germany&quot;,..: 2 5 1 4 2 1 4 2 3
+##  $ service: Factor w/ 9 levels &quot;11684 (NA)&quot;,&quot;11988 (NA)&quot;,..: 8 9 3 1 2 4 7 5 6</code></pre>
 </div>
 </div>
 <div id="external-data-sources" class="section level1">
@@ -474,21 +498,22 @@ for (country in names(oilsets)) {
 
 head(oildata)</code></pre>
 <pre><code>##         Date    Value Country
-## 1 2018-12-31 3048.518  Kuwait
-## 2 2017-12-31 3000.866  Kuwait
-## 3 2016-12-31 3141.080  Kuwait
-## 4 2015-12-31 3060.776  Kuwait
-## 5 2014-12-31 3097.083  Kuwait
-## 6 2013-12-31 3124.746  Kuwait</code></pre>
+## 1 2020-12-31 2686.046  Kuwait
+## 2 2019-12-31 2976.064  Kuwait
+## 3 2018-12-31 3049.709  Kuwait
+## 4 2017-12-31 3009.268  Kuwait
+## 5 2016-12-31 3149.828  Kuwait
+## 6 2015-12-31 3069.363  Kuwait</code></pre>
 <pre class="r"><code>summary(oildata)</code></pre>
 <pre><code>##       Date                Value           Country         
-##  Min.   :1965-12-31   Min.   :    0.0   Length:324        
-##  1st Qu.:1978-12-31   1st Qu.:  854.7   Class :character  
-##  Median :1992-07-01   Median : 2159.5   Mode  :character  
-##  Mean   :1992-07-01   Mean   : 2950.7                     
-##  3rd Qu.:2005-12-31   3rd Qu.: 3733.5                     
-##  Max.   :2018-12-31   Max.   :12406.0</code></pre>
-<pre class="r"><code>#write.table(oildata,file=&quot;data/oildata.csv&quot;, sep=&quot;;&quot;, row.names=FALSE)</code></pre>
+##  Min.   :1965-12-31   Min.   :    0.0   Length:336        
+##  1st Qu.:1979-09-30   1st Qu.:  867.1   Class :character  
+##  Median :1993-07-01   Median : 2191.3   Mode  :character  
+##  Mean   :1993-07-01   Mean   : 2988.2                     
+##  3rd Qu.:2007-04-01   3rd Qu.: 3733.5                     
+##  Max.   :2020-12-31   Max.   :12406.0</code></pre>
+<pre class="r"><code># Write data to disk - commented out as we have already &amp; don&#39;t want a refresh
+# write.table(oildata,file=&quot;data/oildata.csv&quot;, sep=&quot;;&quot;, row.names=FALSE)</code></pre>
 </div>
 </div>
 <div id="summaries" class="section level1">
@@ -498,7 +523,7 @@ head(oildata)</code></pre>
 <p>Show a count, percent, and cumulative percent of items in a list</p>
 <pre class="r"><code># Read in data file to data frame
 df &lt;- read.csv(&#39;data/ufwdata.csv&#39;, sep=&#39;;&#39;,
-               colClasses=c(&quot;POSIXct&quot;,&quot;character&quot;,&quot;character&quot;))
+               colClasses=c(&quot;POSIXct&quot;,&quot;factor&quot;,&quot;factor&quot;))
 
 # Summarise count, pct, cmlpct for Top N items of list x. n=Inf shows everything
 topn &lt;- function(x, label=&quot;x&quot;, n=25) {

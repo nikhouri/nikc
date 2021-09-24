@@ -18,27 +18,27 @@ Personal reference examples for charting/data access & presentation.
 
 ## Roadmap
   
+### Statistic
+* Scatter
+* Histogram 
+* Boxplots
+
 ### Basic Charts
-* [x] Lines
-* [x] Step (ex. tick px)
-* [x] Stacked bars (time series)
-* [x] Column (categories)
-* [x] Range-and-point
+* Lines
+* Step (ex. tick px)
+* Faceted
+* Stacked bars (time series)
+* Column (categories)
+* Point and Range
 
 ### Complex
-* [x] Faceted
-* [x] Maps
-* [x] Heatmap
-* [ ] [Multi-panel w/ facets ](https://github.com/vcannataro/COVID19_data_explore/blob/master/output_data/figures/all_states_VS_each_state.png)
-
-### Statistic
-* [x] Scatter
-* [x] Histogram 
-* [x] Boxplots
+* Maps
+* Heatmap
+* Multi-panel w/ facets
 
 ### Data
-* [x] CSV imports (with dates/times)
-* [x] Inline data (CSV from string)
-* [x] `topn` function
-* [x] Quandl
-* [ ] UK, US, EU Government Data portals
+* CSV imports (with dates/times)
+* CSV import entire directory
+* Inline data (CSV from string)
+* Quandl import
+* `topn` function

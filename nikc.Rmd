@@ -102,7 +102,7 @@ ggplot() +
 ```
 
 ```{r, echo=FALSE, fig.height=1}
-library(viridis)
+suppressPackageStartupMessages(library(viridis))
 ggplot() +
     geom_col(aes(x=1,y=rep(1/1000,1000),fill=seq(1,1000)),position=position_stack()) +
     scale_fill_viridis(option="plasma") +
@@ -194,7 +194,7 @@ ggplot(df) +
 
 ## Histogram `geom_histogram()` and `stat_ecdf()`
 
-Histograms of the CPU data. Secondary axes are not easy to do in ggplot2, this example uses a manual factor to adjust the scaling.
+Histograms of the CPU data. Secondary axes are not easy to do in ggplot2, this example uses a manual factor to adjust thsse scaling.
 
 * Categorised & fill/line colour varies by group
 * Cumulative distribution shown for each category, on second axis (scaled by manually chosen factor)
@@ -392,49 +392,63 @@ ggplot(df) +
 
 ## Facets: `facet_wrap()`
 
-Oil data above presented as individual line charts instead.
+Apple COVID‑19 Mobility Trends Reports. No points for guessing when the music festival is.
 
+* Read data directly from a compressed file
+* De-pivot data
 * Facets with custom themeing
+* Shaded regions
 
 ```{r}
+library(tidyr)
 library(ggplot2)
-library(ggrepel)
 
-# Read in data file to data frame
-df <- read.csv('data/oildata.csv', sep=';',
-               colClasses=c("Date","numeric","factor"))
+# Import & un-pivot data. read.csv can take compressed files directly!
+amob <- read.csv('data/applemobilitytrends-2021-09-21.csv.bz2')
+gamob <- gather(amob, "date", "index", 7:ncol(amob))
+gamob$pdate <- as.Date(gamob$date,format="X%Y.%m.%d")
 
-# Label data
-labels <- merge(aggregate(Value ~ Country, data=df, FUN=max), df)
+# Extract our regions. NB: regions which are countries have $country blank
+regions <- c('Reading', 'England')
+rdata <- gamob[gamob$region %in% regions & gamob$country=='United Kingdom',]
+rdata$region <- factor(rdata$region, levels=regions, ordered=TRUE) # Re-order
 
-# Tol Vibrant colour map
-tolvibrant <- c("#0077BB", "#33BBEE", "#009988", "#EE7733", "#CC3311", "#EE3377", "#BBBBBB")
+lockdowns <- data.frame(start=as.Date(c('2020-03-26','2020-11-05','2021-01-04')),
+                        end=as.Date(c('2020-05-13','2020-12-02','2021-02-22')))
+
+# Okabe-Ito colour map
+okabe <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
 
 # Number format function
 numfmt <- function(x) format(x, big.mark=" ", decimal.mark=".", scientific=FALSE)
 
-# Plot data
-ggplot(df) +
-    # Data series
-    geom_line(aes(x=Date,y=Value,color=Country), size=1) +
-    # Facet the series
-    facet_wrap(vars(Country),ncol=3) +
+ggplot(rdata) +
+  # Lockdown ranges
+  geom_rect(data=lockdowns,aes(xmin=start,xmax=end,ymin=-Inf,ymax=Inf),
+            alpha=0.5,fill=c('#DDDDDD')) +
+  # Time series
+    geom_line(aes(x=pdate,y=index,color=transportation_type)) +
+  # Baseline
+    geom_hline(yintercept=100, color="#888888") +
     # Axis scales and colour scales
     scale_y_continuous(label=numfmt) +
-    scale_color_discrete(type=tolvibrant) +
+    scale_color_discrete(type=okabe) +
+    facet_wrap(vars(region),ncol=4) +
     # Plot labels
-    labs(title="Daily Average Oil Production - Middle East (Gulf Countries)",
-         x=NULL, y="Thousands of barrels/day",
-         subtitle = "Crude oil, shale oil, oil sands, and NGLs",
-         caption="Source: BP Statistical Review of World Energy 2020") +
+    labs(title="Apple Mobility Trends",
+         x=NULL, y="Index",
+         subtitle = "Daily requests for directions in Apple Maps, indexed from 13 Jan 2020. Lockdowns are shaded.",
+         caption="Sources: Apple COVID‑19 Mobility Trends Reports, Wikipedia (lockdowns)",
+         color=NULL) +
     # Themeing & fonts
     theme_light() +
-    theme(legend.position="hidden", strip.background=element_blank(),
+    theme(legend.position="top",
           text=element_text(size=15, family="Fira Sans Extra Condensed"),
           plot.title=element_text(family="Fira Sans Extra Condensed Medium"),
           plot.caption=element_text(color="#666666"),
+          strip.background=element_blank(),
           strip.text=element_text(size=15, color="black",
-                                  family="Fira Sans Extra Condensed Medium"))
+            family="Fira Sans Extra Condensed Medium"))
 ```
 
 ## Stacked Bars: `geom_bar()`
@@ -583,6 +597,82 @@ ggplot(df) +
 
 # Complex Charts
 
+## Multi-panel charts `gridExtra()` 
+
+Combine 2 different views of the data, using stacked bars (showing individual series combining to a total) and line charts (showing detail on individual series). Oil data.
+
+* Same underlying data, 2 different presentations
+* `gridExtra::grid.arrange()` is simple to use and works with ggplot (`par()` does not).
+
+```{r, fig.height=10}
+library(ggplot2)
+library(gridExtra)
+
+# Read in data file to data frame, get latest year
+df <- read.csv('data/oildata.csv', sep=';',
+               colClasses=c("Date","numeric","factor"))
+
+# Re-order so largest values sink to bottom
+df_ord <- df[df$Date == max(df$Date),]
+df$Country <- factor(df$Country,
+                     levels=df_ord$Country[order(df_ord$Value, decreasing=FALSE)])
+
+# Okabe Ito colour map
+okabe <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+
+# Number format function
+numfmt <- function(x) format(x, big.mark=" ", decimal.mark=".", scientific=FALSE)
+
+# Plot data
+par(mfrow=c(1,1))
+
+# First chart - stacked bar
+p1 <- ggplot(df) +
+    # Data series
+    geom_bar(aes(fill=Country, x=Date, y=Value), position="stack", stat="identity") +
+    # Axis scales and colour scales
+    scale_y_continuous(label=numfmt) + 
+    scale_fill_discrete(type=okabe,
+                        guide=guide_legend(nrow=1)) +
+    # Plot labels
+    labs(title="Daily Average Oil Production - Middle East (Gulf Countries)",
+         x=NULL, y="Thousands of barrels/day",
+         subtitle="Crude oil, shale oil, oil sands, and NGLs",
+         fill=NULL) +
+    # Themeing & fonts
+    theme_light() +
+    theme(legend.position="top",
+          text=element_text(size=15, family="Fira Sans Extra Condensed"),
+          plot.title=element_text(family="Fira Sans Extra Condensed Medium"),
+          plot.caption=element_text(color="#666666"))
+
+# Second chart - faceted lines
+p2 <- ggplot(df) +
+    # Data series
+    geom_line(aes(x=Date,y=Value,color=Country), size=1) +
+    # Facet the series
+    facet_wrap(vars(Country),ncol=3) +
+    # Axis scales and colour scales
+    scale_y_continuous(label=numfmt) +
+    scale_color_discrete(type=okabe) +
+    # Plot labels
+    labs(title=NULL,
+         x=NULL, y="Thousands of barrels/day",
+         subtitle=NULL,
+         caption="Source: BP Statistical Review of World Energy 2020") +
+    # Themeing & fonts
+    theme_light() +
+    theme(legend.position="hidden", strip.background=element_blank(),
+          text=element_text(size=15, family="Fira Sans Extra Condensed"),
+          plot.title=element_text(family="Fira Sans Extra Condensed Medium"),
+          plot.caption=element_text(color="#666666"),
+          strip.text=element_text(size=15, color="black",
+                                  family="Fira Sans Extra Condensed Medium"))
+
+# Display the 2 plots
+grid.arrange(p1, p2, nrow=2)
+```
+
 ## Map: `geom_map()`
 
 Note you'll probably need to do some remapping of country names to get them to work with (as in this case, using MaxMind Geolocation output from IP addresses)
@@ -594,7 +684,7 @@ Note you'll probably need to do some remapping of country names to get them to w
 
 ```{r}
 library(ggplot2)
-library(rworldmap)
+suppressPackageStartupMessages(library(rworldmap)) # Noisy startup
 
 # Read in data file to data frame
 df <- read.csv('data/ufwdata.csv', sep=';',

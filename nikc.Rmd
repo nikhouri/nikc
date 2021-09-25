@@ -389,9 +389,51 @@ ggplot(df) +
           plot.caption=element_text(color="#666666"))
 ```
 
+## Bars: `geom_col()`
+
+Oil data aggregated into a total by year.
+
+* `geom_col()` shows underlying values (by default)
+* `geom_bar()` performs a count (by default)
+
+```{r}
+library(ggplot2)
+
+# Read in data file to data frame, and total it
+df <- read.csv('data/oildata.csv', sep=';',
+               colClasses=c("Date","numeric","factor"))
+totals <- aggregate(Value~Date,data=df,FUN=sum) 
+
+# Okabe Ito colour map
+okabe <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+
+# Number format function
+numfmt <- function(x) format(x, big.mark=" ", decimal.mark=".", scientific=FALSE)
+
+# Plot data
+ggplot(totals) +
+    # Data series
+    geom_col(aes(x=Date, y=Value), fill=okabe[1]) +
+    # Axis scales and colour scales
+    scale_y_continuous(label=numfmt) + 
+    # Plot labels
+    labs(title="Daily Average Oil Production - Middle East (Gulf Countries)",
+         x=NULL, y="Thousands of barrels/day",
+         subtitle="Crude oil, shale oil, oil sands, and NGLs",
+         caption="Source: BP Statistical Review of World Energy 2020",
+         fill=NULL) +
+    # Themeing & fonts
+    theme_light() +
+    theme(legend.position="top",
+          text=element_text(size=15, family="Fira Sans Extra Condensed"),
+          plot.title=element_text(family="Fira Sans Extra Condensed Medium"),
+          plot.caption=element_text(color="#666666"))
+```
+
+
 ## Stacked Bars: `geom_bar()`
 
-Oil data above presented as a stacked bar chart instead.
+Oil data presented as a stacked bar chart instead.
 
 * Data sorted largest at the bottom to smallest at the top
 * Legend moved to top (categories visible first, then data)
